@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const authCookie = authCookieInput.value;
         refreshButton.disabled = true;
         resultElement.textContent = "Please wait, your cookie is generating.";
+        
+        // Countdown logic
         let countdown = 7;
         const countdownInterval = setInterval(function () {
             countdownElement.textContent = `Refreshing in ${countdown} seconds...`;
@@ -17,28 +19,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 countdownElement.textContent = "";
             }
         }, 1000);
-        setTimeout(function () {
-            fetch("/refresh?cookie=" + encodeURIComponent(authCookie), {
-                method: "GET",
+
+        // Immediately make the fetch request
+        fetch("/refresh?cookie=" + encodeURIComponent(authCookie), {
+            method: "GET",
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data && data.redemptionResult && data.redemptionResult.refreshedCookie) {
+                    resultElement.textContent = data.redemptionResult.refreshedCookie;
+                } else {
+                    resultElement.textContent = "Failed to refresh, try again!";
+                }
             })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data && data.redemptionResult && data.redemptionResult.refreshedCookie) {
-                        resultElement.textContent = data.redemptionResult.refreshedCookie;
-                    } else {
-                        resultElement.textContent = "Failed to refresh, try again!";
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    resultElement.textContent = "Error occurred while refreshing the cookie. Cookie is Probably Invalid.";
-                })
-                .finally(() => {
-                    refreshButton.disabled = false;
-                    const refreshButtonIcon = document.getElementById('refreshButtonIcon');
-                    refreshButtonIcon.classList.remove('rotate-icon');
-                });
-        }, 7000);
+            .catch((error) => {
+                console.error(error);
+                resultElement.textContent = "Error occurred while refreshing the cookie. Cookie is Probably Invalid.";
+            })
+            .finally(() => {
+                refreshButton.disabled = false;
+                const refreshButtonIcon = document.getElementById('refreshButtonIcon');
+                refreshButtonIcon.classList.remove('rotate-icon');
+            });
     });
 
     const copyButton = document.getElementById("copyButton");
